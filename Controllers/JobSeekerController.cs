@@ -1,5 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Azure.Storage.Blobs.Specialized;
 using Azure.Storage.Sas;
 using JobPortalCORE.Data;
 using JobPortalCORE.Models;
@@ -7,9 +8,9 @@ using JobPortalCORE.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using SixLabors.ImageSharp.Processing;
 using System.Net;
 using System.Net.Mail;
-using Azure.Storage.Blobs.Specialized;
 
 namespace JobPortalCORE.Controllers
 {
@@ -73,20 +74,16 @@ namespace JobPortalCORE.Controllers
             }
         }
 
+        #region Azure Blob Storage Learning Start
         [HttpPost]
         public async Task<IActionResult> Create(Employee employee, int id)
         {
             if (id == 0) // --- CREATE NEW EMPLOYEE ---
             {
-                // 1. Profile Image Upload
+                // 1. Profile Image Upload (Seedha izmages me compress hoke save hogi)
                 if (employee.ImageFile != null)
                 {
-                    // Naye employee ki koi purani photo nahi hoti, isliye seedha upload
-                    string rawUrl = await UploadToBlobAsync(employee.ImageFile, "izmages", employee);
-
-                    // 🪄 JADU: DB mein save hone se pehle link badal do!
-                    // Taaki website directly naye container se photo uthaye
-                    employee.ImagePath = rawUrl.Replace("/izmages/", "/compressed-images/");
+                    employee.ImagePath = await UploadToBlobAsync(employee.ImageFile, "izmages", employee);
                 }
 
                 // 2. Resume Upload 
@@ -125,20 +122,16 @@ namespace JobPortalCORE.Controllers
                     existingEmployee.Password = employee.Password;
                 }
 
-                // 👉 Handle Image Update & Deletion
+                // 👉 Handle Image Update & Deletion (1 Container Logic)
                 if (employee.ImageFile != null)
                 {
+                    // Purani izmages wali photo uda do
                     if (!string.IsNullOrEmpty(existingEmployee.ImagePath))
                     {
-                        // Purani file compressed wale container se udhani hai
-                        await DeleteBlobAsync(existingEmployee.ImagePath, "compressed-images");
+                        await DeleteBlobAsync(existingEmployee.ImagePath, "izmages");
                     }
-
-                    // 1. Pehle 'izmages' mein upload karo
-                    string rawUrl = await UploadToBlobAsync(employee.ImageFile, "izmages", employee);
-
-                    // 2. 🪄 JADU: DB mein save hone se pehle link badal do!
-                    existingEmployee.ImagePath = rawUrl.Replace("/izmages/", "/compressed-images/");
+                    // Nayi photo izmages me upload kar do
+                    existingEmployee.ImagePath = await UploadToBlobAsync(employee.ImageFile, "izmages", employee);
                 }
 
                 // 👉 Handle Resume Update & Deletion
@@ -158,9 +151,7 @@ namespace JobPortalCORE.Controllers
             return RedirectToAction("Index");
         }
 
-        #region Azure Blob Storage Learning Start
-
-        // 👈 NAYA LOGIC: Parameter mein 'Employee employee' add kiya hai taaki dynamic data mil sake
+        // 👈 1 CONTAINER LOGIC: Upload + Compression sab yahan hoga
         private async Task<string> UploadToBlobAsync(IFormFile file, string containerName, Employee employee)
         {
             string connectionString = _configuration.GetConnectionString("BlobConnectionString");
@@ -184,19 +175,19 @@ namespace JobPortalCORE.Controllers
             string cityName = _context.Cities.FirstOrDefault(c => c.CityId == employee.CityId)?.Name ?? "NA";
 
             var blobTags = new Dictionary<string, string>
-            {
-                { "Category", containerName },
-                { "JobProfile", jobProfileName },
-                { "Skill", skillName },
-                { "City", cityName }
-            };
+    {
+        { "Category", containerName },
+        { "JobProfile", jobProfileName },
+        { "Skill", skillName },
+        { "City", cityName }
+    };
 
             var metadata = new Dictionary<string, string>
-            {
-                { "OriginalFileName", file.FileName },
-                { "UploadedBy", string.IsNullOrEmpty(employee.Name) ? "Candidate" : employee.Name },
-                { "Project", "JobPortal" }
-            };
+    {
+        { "OriginalFileName", file.FileName },
+        { "UploadedBy", string.IsNullOrEmpty(employee.Name) ? "Candidate" : employee.Name },
+        { "Project", "JobPortal" }
+    };
 
             var options = new BlobUploadOptions
             {
@@ -205,15 +196,44 @@ namespace JobPortalCORE.Controllers
                 Metadata = metadata
             };
 
-            // 🚀 FAST UPLOAD (Bina ruke seedha cloud par phek do)
             using (var stream = file.OpenReadStream())
             {
-                await blobClient.UploadAsync(stream, options);
+                // 🪄 JADU: Agar Image hai, toh pehle compress karo phir upload
+                if (ext == ".jpg" || ext == ".jpeg" || ext == ".png")
+                {
+                    using (SixLabors.ImageSharp.Image image = await SixLabors.ImageSharp.Image.LoadAsync(stream))
+                    {
+                        image.Mutate(x => x.Resize(new SixLabors.ImageSharp.Processing.ResizeOptions
+                        {
+                            Size = new SixLabors.ImageSharp.Size(1500, 0),
+                            Mode = SixLabors.ImageSharp.Processing.ResizeMode.Max
+                        }));
+
+                        using (var outputStream = new MemoryStream())
+                        {
+                            if (ext == ".png")
+                            {
+                                await image.SaveAsync(outputStream, new SixLabors.ImageSharp.Formats.Png.PngEncoder());
+                            }
+                            else
+                            {
+                                await image.SaveAsync(outputStream, new SixLabors.ImageSharp.Formats.Jpeg.JpegEncoder() { Quality = 80 });
+                            }
+
+                            outputStream.Position = 0;
+                            await blobClient.UploadAsync(outputStream, options);
+                        }
+                    }
+                }
+                else
+                {
+                    // 📄 Agar PDF (Resume) hai, toh bina chhede seedha upload
+                    await blobClient.UploadAsync(stream, options);
+                }
             }
 
             return blobClient.Uri.ToString();
         }
-
         private async Task DeleteBlobAsync(string fileUrl, string containerName)
         {
             try
