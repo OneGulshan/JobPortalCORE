@@ -1,0 +1,64 @@
+﻿@model JobPortalCORE.Models.Message
+
+@{
+    ViewData["Title"] = "Send Message / Mail";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow border-0 rounded-4">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h3 class="mb-0">📧 Send a Message</h3>
+                    <p class="small mb-0 opacity-75">Humein apni query ya message likh kar bhejein</p>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    <form asp-action="MailSent">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label fw-bold">Full Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-person"></i>👤</span>
+                                <input asp-for="Name" class="form-control border-start-0" placeholder="Apna naam likhein" />
+                            </div>
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-bold">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope"></i>✉️</span>
+                                <input asp-for="Email" type="email" class="form-control border-start-0" placeholder="example@gmail.com" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Your Message</label>
+                            <textarea asp-for="MessageData" class="form-control" rows="5" placeholder="Aap kya kehna chahte hain..."></textarea>
+                            <span asp-validation-for="MessageData" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm rounded-pill">
+                                🚀 Send Message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="card-footer bg-white text-center py-3 border-0">
+                    <small class="text-muted">Humein aapki feedback ka intezaar rahega!</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

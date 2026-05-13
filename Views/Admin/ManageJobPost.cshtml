@@ -1,0 +1,68 @@
+﻿@model IEnumerable<JobPortalCORE.Models.JobPost>
+
+@{
+    ViewData["Title"] = "Manage Job Post";
+}
+
+<div class="container-fluid mt-4">
+    <div class="mb-4">
+        <h2>💼 Manage Job Posts</h2>
+        <p class="text-muted">Yahan aap sabhi recruiters ki daali hui job vacancies ko approve ya delete kar sakte hain.</p>
+    </div>
+
+    <div class="table-responsive shadow-sm bg-white rounded p-3">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Required Experience</th>
+                    <th>Offered Salary</th>
+                    <th>Vacancies</th>
+                    <th>Notice Period</th>
+                    <th>@Html.DisplayNameFor(model => model.Comment)</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="fw-bold">
+                            @Html.DisplayFor(modelItem => item.MinExp) - @Html.DisplayFor(modelItem => item.MaxExp) <span class="text-muted fw-normal">Years</span>
+                        </td>
+                        
+                        <td class="text-success fw-bold">
+                            ₹ @Html.DisplayFor(modelItem => item.MinSal) - ₹ @Html.DisplayFor(modelItem => item.MaxSal)
+                        </td>
+                        
+                        <td>
+                            <span class="badge bg-info text-dark">
+                                @Html.DisplayFor(modelItem => item.NoOfVac) Vacancies
+                            </span>
+                        </td>
+                        
+                        <td>
+                            @Html.DisplayFor(modelItem => item.NoticePeriod) <span class="text-muted">Days</span>
+                        </td>
+                        
+                        <td style="word-break: break-all; min-width: 250px; font-size: 0.9em;">
+                            @Html.DisplayFor(modelItem => item.Comment)
+                        </td>
+                        
+                        <td>
+                            <a asp-action="ApproveJobPost" asp-route-id="@item.JobPostId" class="btn btn-sm @(item.Status == true ? "btn-success" : "btn-warning text-dark")">
+                                @(item.Status == true ? "Approved" : "Not Approved")
+                            </a>
+                        </td>
+                        
+                        <td>
+                            <a asp-action="DeleteJobPost" asp-route-id="@item.JobPostId" class="btn btn-sm btn-danger" onclick="return confirm('Bhai, is Job Post ko sach mein delete karna hai?');">
+                                🗑️ Delete
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

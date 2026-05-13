@@ -1,0 +1,102 @@
+﻿@model IEnumerable<JobPortalCORE.ViewModels.JobsViewJobSeekerViewModel>
+
+@{
+    ViewData["Title"] = "Available Jobs";
+}
+
+<div class="container-fluid mt-4 mb-5">
+    <div class="mb-4">
+        <h2 class="fw-bold text-primary">🔍 Find Your Dream Job</h2>
+        <p class="text-muted">Apne career ke liye sahi job chunein aur turant apply karein.</p>
+    </div>
+
+    <div class="table-responsive shadow-sm bg-white rounded p-3">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Company</th>
+                    <th>Job Role</th>
+                    <th>Experience</th>
+                    <th>Salary (Monthly)</th>
+                    <th>Vacancies</th>
+                    <th>Notice</th>
+                    <th>Posted On</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="fw-bold" style="color: #2c3e50;">
+                            🏢 @Html.DisplayFor(modelItem => item.CompanyName)
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary-subtle text-secondary border">
+                                @Html.DisplayFor(modelItem => item.JPName)
+                            </span>
+                        </td>
+                        <td>
+                            @item.MinExp - @item.MaxExp <span class="small text-muted">Yrs</span>
+                        </td>
+                        <td class="text-success fw-bold">
+                            ₹ @item.MinSal - ₹ @item.MaxSal
+                        </td>
+                        <td>
+                            <span class="badge bg-info text-dark">@item.NoOfVac</span>
+                        </td>
+                        <td>@item.NoticePeriod <span class="small text-muted">Days</span></td>
+                        <td class="small text-muted">
+                            @item.InsertedDate.ToString("dd-MMM-yyyy")
+                        </td>
+                        <td class="text-center">
+                            <button onclick="SentMail(@item.CompanyId)" class="btn btn-primary btn-sm px-3 rounded-pill shadow-sm">
+                                Apply Now
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@*------------------ 💡 Modern Popup Design ------------------*@
+<div id="div_overlay" style="position: fixed; left: 0px; top: 0px; right: 0px; bottom: 0px; background: rgba(0,0,0,0.6); z-index: 9998; display: none; backdrop-filter: blur(3px);"></div>
+
+<div id="div_popup" style="position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 9999; display: none; width: 90%; max-width: 550px;">
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+            <h5 class="mb-0">📧 Send Application</h5>
+            <button type="button" class="btn-close btn-close-white" onclick="ClosePopup()"></button>
+        </div>
+        <div class="card-body p-0" style="height: 450px;">
+            <iframe id="iframe_pop" src="" style="border:none; width: 100%; height: 100%;"></iframe>
+        </div>
+        <div class="card-footer bg-light text-end py-2">
+            <button class="btn btn-sm btn-secondary" onclick="ClosePopup()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script type="text/javascript">
+        function SentMail(CompanyId) {
+            var url = '@Url.Action("MailSent", "JobSeeker")?CompanyId=' + CompanyId;
+            document.getElementById('iframe_pop').src = url;
+            
+            // Smoothly show overlay and popup
+            $('#div_overlay').fadeIn(300);
+            $('#div_popup').css('display', 'block').addClass('animate__animated animate__zoomIn');
+        }
+
+        function ClosePopup() {
+            $('#div_overlay').fadeOut(300);
+            $('#div_popup').fadeOut(300);
+        }
+    </script>
+}

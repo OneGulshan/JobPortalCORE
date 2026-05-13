@@ -1,0 +1,17 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "..\\JobPortalBackgroundWorker\\JobPortalBackgroundWorker.csproj",
+        "Action": "Start",
+        "DebugTarget": "JobPortalBackgroundWorker"
+      },
+      {
+        "Path": "JobPortalCORE.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      }
+    ]
+  }
+]

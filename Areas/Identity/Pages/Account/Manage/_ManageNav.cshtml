@@ -1,0 +1,74 @@
+﻿@inject SignInManager<ApplicationUser> SignInManager
+@{
+    var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+}
+
+<div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+    <div class="card-header bg-white py-3 border-bottom">
+        <h6 class="mb-0 fw-bold text-primary"><i class="bi bi-gear-fill me-2"></i> Account Settings</h6>
+    </div>
+    <div class="card-body p-2">
+        <ul class="nav nav-pills flex-column custom-manage-nav">
+            <li class="nav-item mb-1">
+                <a class="nav-link rounded-3 py-2 @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-page="./Index">
+                    <i class="bi bi-person-circle me-2"></i> Profile Info
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link rounded-3 py-2 @ManageNavPages.EmailNavClass(ViewContext)" id="email" asp-page="./Email">
+                    <i class="bi bi-envelope-at me-2"></i> Email Settings
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link rounded-3 py-2 @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword">
+                    <i class="bi bi-shield-lock me-2"></i> Password
+                </a>
+            </li>
+            
+            @if (hasExternalLogins)
+            {
+                <li id="external-logins" class="nav-item mb-1">
+                    <a id="external-login" class="nav-link rounded-3 py-2 @ManageNavPages.ExternalLoginsNavClass(ViewContext)" asp-page="./ExternalLogins">
+                        <i class="bi bi-google me-2"></i> Linked Accounts
+                    </a>
+                </li>
+            }
+
+            <li class="nav-item mb-1">
+                <a class="nav-link rounded-3 py-2 @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)" id="two-factor" asp-page="./TwoFactorAuthentication">
+                    <i class="bi bi-shield-check me-2"></i> Security (2FA)
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link rounded-3 py-2 @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData">
+                    <i class="bi bi-database-lock me-2"></i> Personal Data
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<style>
+    /* 💡 NAYA STYLE: Sidebar ko chamkane ke liye */
+    .custom-manage-nav .nav-link {
+        color: #64748b;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+        .custom-manage-nav .nav-link:hover {
+            background-color: #f1f5f9;
+            color: #4338ca;
+        }
+
+        /* Active link ko premium gradient ya solid color dena */
+        .custom-manage-nav .nav-link.active {
+            background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%) !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+    .custom-manage-nav i {
+        font-size: 1.1rem;
+    }
+</style>

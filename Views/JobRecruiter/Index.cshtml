@@ -1,0 +1,62 @@
+﻿@model IEnumerable<JobPortalCORE.Models.Company>
+
+@{
+    ViewData["Title"] = "Registered Recruiters";
+}
+
+<div class="container-fluid mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>🏢 Registered Recruiters (Companies)</h2>
+            <p class="text-muted">Yahan aap sabhi registered companies aur recruiters ki list dekh sakte hain.</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary shadow-sm fw-bold">
+            ➕ Add New Recruiter
+        </a>
+    </div>
+
+    <div class="table-responsive shadow-sm bg-white rounded p-3">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Company Name</th>
+                    <th>Email Address</th>
+                    <th>Password</th>
+                    <th>@Html.DisplayNameFor(model => model.Comment)</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="fw-bold text-primary">
+                            @Html.DisplayFor(modelItem => item.Name)
+                        </td>
+                        
+                        <td style="word-break: break-all; min-width: 180px;">
+                            @Html.DisplayFor(modelItem => item.Email)
+                        </td>
+                        
+                        <td class="text-muted">
+                            @Html.DisplayFor(modelItem => item.Password)
+                        </td>
+                        
+                        <td style="word-break: break-all; min-width: 250px; font-size: 0.9em;">
+                            @Html.DisplayFor(modelItem => item.Comment)
+                        </td>
+                        
+                        <td class="text-center" style="min-width: 150px;">
+                            <a asp-action="Create" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary me-1">
+                                ✏️ Edit
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger" onclick="return confirm('Bhai, is company/recruiter ko sach mein delete karna hai?');">
+                                🗑️ Delete
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

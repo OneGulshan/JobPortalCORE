@@ -1,0 +1,67 @@
+﻿@{
+    ViewData["Title"] = "Welcome to JobPortal";
+}
+
+<div class="bg-primary text-white py-5 mb-5 rounded-3 shadow">
+    <div class="container text-center py-5">
+        <h1 class="display-3 fw-bold">Apni Dream Job Aaj Hi Payein! 🚀</h1>
+        <p class="lead mb-4">India ka sabse asaan aur fast Job Portal. Lakhon jobs aur behtareen candidates, sab ek hi jagah.</p>
+        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+            <a asp-controller="JobSeeker" asp-action="ViewJobs" class="btn btn-light btn-lg px-4 gap-3 fw-bold">🔍 Find Jobs</a>
+            <a asp-controller="JobPost" asp-action="Create" class="btn btn-outline-light btn-lg px-4">💼 Post a Job</a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row g-4 text-center">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm p-4">
+                <div class="display-5 text-primary mb-3">🧑‍🎓</div>
+                <h4 class="fw-bold">Job Seekers</h4>
+                <p class="text-muted">Apna profile banayein, skills update karein aur top companies mein apply karein.</p>
+                <a asp-controller="JobSeeker" asp-action="Index" class="btn btn-outline-primary mt-auto">Register as Seeker</a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm p-4 text-white bg-dark">
+                <div class="display-5 mb-3">🏢</div>
+                <h4 class="fw-bold text-white">Recruiters</h4>
+                <p class="opacity-75">Behtareen talent ko hire karein. Minutes mein job post karein aur candidates manage karein.</p>
+                <a asp-controller="JobRecruiter" asp-action="Index" class="btn btn-primary mt-auto border-0">Company Register</a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm p-4">
+                <div class="display-5 text-success mb-3">📈</div>
+                <h4 class="fw-bold">Our Growth</h4>
+                <div class="d-flex justify-content-around mt-3">
+                    <div>
+                        <h3 class="fw-bold mb-0">500+</h3>
+                        <small class="text-muted">Jobs</small>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0">1K+</h3>
+                        <small class="text-muted">Users</small>
+                    </div>
+                </div>
+                <p class="text-muted mt-3">Rozana naye log jud rahe hain.</p>
+                <a href="#" class="btn btn-outline-success mt-auto">Learn More</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5 py-5 border-top">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <h3 class="fw-bold">Koi sawaal hai?</h3>
+            <p class="text-muted">Humaari team aapki madad ke liye hamesha taiyaar hai.</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <a asp-controller="JobSeeker" asp-action="MailSent" class="btn btn-dark px-5 rounded-pill shadow">📧 Contact Us</a>
+        </div>
+    </div>
+</div>

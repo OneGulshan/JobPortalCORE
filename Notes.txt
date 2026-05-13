@@ -1,0 +1,66 @@
+- Remove each function on jQuery for direct binding Dropdownlist on View
+- And ViewBag alternative use on View for Sending Dropdown data on View
+- Page Life Cycle, Event Life Cycle
+- In In Cascade Migration Throw Exception :- then use Restrict in Migration by performing (onDelete: ReferentialAction.Cascade).
+- For Generate Script :- Script-Migration
+
+@section Scripts {
+    <script>
+        debugger;
+        $(document).ready(function () {
+            debugger;
+            $("#CountryList").on("change", function () {
+            $('#StatesList').empty();
+            $('#StatesList').append('<option value=' + 0 + ' >' + ' --Select States-- ' + '</option >');
+            debugger;
+
+                $.ajax({
+                    type: "Post",
+                    url: "/JobSeeker/GetStates",
+                    data: { "CId": $('#CountryList :selected').val() },
+                    success: function (response) {
+                        $("#StatesList").append(response);
+                        console.log(response);
+                    },
+                    failure: function (response) {
+                        alert(response.responseText);
+                    },
+                    error: function (response) {
+                        alert(response.responseText);
+                    }
+                });
+            })
+
+        $("#JobProfileList").on("change", function () {
+
+        $('#SkillsList').empty();
+        $('#SkillsList').append('<option value=' + 0 + ' >' + ' --Select Skills-- ' + '</option >');
+
+            $.ajax({
+                type: "Post",
+                url: "/JobSeeker/GetSkills",
+                data: { "JPId": $('#JobProfileList :selected').val() },
+                success: function (response) {
+                  console.log(response);
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+        })
+                
+    });
+
+    </script>
+}
+
+what is the use of identity_insert is set to off?
+- The major cause of the “IDENTITY_INSERT is set to off C#” error is when you're trying to insert a value into an identity column when the IDENTITY_INSERT property is off. In SQL server, when this property is off, you're leaving it to SQL Server to increment the value of the identity column without your intervention.
+why sql used identity identity_insert is set to off?
+- Why Is identity_insert off in SQL Server?
+Identity_insert is off in SQL Server because you want to insert a value into an identity column when the identity_insert variable is off. The same error happens when you're setting the variable in your stored procedure and not when you're calling the stored procedure.
+- What is the advantage of nullable in C#?
+Nullable reference types enable you to declare if variables of a reference type should or shouldn't be assigned a null value. The compiler's static analysis and warnings when your code might dereference null are the most important benefit of this feature.

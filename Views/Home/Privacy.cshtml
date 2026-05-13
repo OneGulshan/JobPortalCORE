@@ -1,0 +1,45 @@
+﻿@{
+    ViewData["Title"] = "Privacy Policy";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="text-center mb-5">
+                <h1 class="display-5 fw-bold text-primary">
+                    <i class="bi bi-shield-check text-success me-2"></i> @ViewData["Title"]
+                </h1>
+                <p class="text-muted lead">Aapki privacy aur data security hamari sabse badi priority hai.</p>
+            </div>
+
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4 p-md-5">
+                    <p class="text-muted mb-4 border-bottom pb-3">Last updated: May 2026</p>
+
+                    <h4 class="fw-bold mt-4"><i class="bi bi-database me-2 text-primary"></i> 1. Hum kya information collect karte hain?</h4>
+                    <p class="text-muted">Jab aap JobPortal par register karte hain, toh hum aapse kuch zaroori details lete hain jaise aapka naam, email address, contact number, aur resume/CV (agar aap job seeker hain) ya company details (agar aap recruiter hain).</p>
+
+                    <h4 class="fw-bold mt-4"><i class="bi bi-briefcase me-2 text-primary"></i> 2. Aapki information ka use kaise hota hai?</h4>
+                    <p class="text-muted">Aapka data sirf in professional kamo ke liye use hota hai:</p>
+                    <ul class="text-muted">
+                        <li>Job Seekers ko unki profile ke hisaab se sahi job opportunities dikhana.</li>
+                        <li>Recruiters ko unki job post ke liye behtareen candidates suggest karna.</li>
+                        <li>Account security, password recovery, aur zaruri system updates bhejna.</li>
+                    </ul>
+
+                    <h4 class="fw-bold mt-4"><i class="bi bi-cloud-check me-2 text-primary"></i> 3. Data Protection (Powered by Azure)</h4>
+                    <p class="text-muted">Aapka poora data Microsoft Azure ke highly secure cloud servers par host kiya gaya hai. Hum aapke passwords ko encrypted format mein save karte hain aur aapka personal data kisi bhi 3rd-party (bahari company) ko bechte ya share nahi karte.</p>
+
+                    <h4 class="fw-bold mt-4"><i class="bi bi-cookie me-2 text-primary"></i> 4. Cookies aur Tracking</h4>
+                    <p class="text-muted">Humari website aapka session maintain rakhne ke liye aur behtar user experience dene ke liye basic cookies ka istemal karti hai. Hum kisi bhi tarah ki intrusive tracking nahi karte.</p>
+
+                    <h4 class="fw-bold mt-5 border-top pt-4"><i class="bi bi-envelope-paper me-2 text-primary"></i> 5. Contact Us</h4>
+                    <p class="text-muted">Agar aapko apni privacy, data deletion, ya account ko lekar koi bhi sawaal hai, toh aap humari support team se sampark kar sakte hain:</p>
+                    <a asp-controller="JobSeeker" asp-action="MailSent" class="btn btn-outline-primary rounded-pill px-4 mt-2">
+                        📧 Contact Support Team
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

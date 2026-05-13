@@ -1,0 +1,291 @@
+﻿@model JobPortalCORE.Models.Employee
+
+@{
+    ViewData["Title"] = ViewBag.BT ?? "Create Employee";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-primary text-white py-3">
+                    <h4 class="mb-0">🧑‍💼 @ViewBag.BT Employee Profile</h4>
+                </div>
+                
+                <div class="card-body p-4 p-md-5 bg-light">
+                    <form method="post" asp-action="Create" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        @Html.HiddenFor(m => m.EId)
+
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h5 class="text-primary border-bottom pb-2 mb-3">Personal Information</h5>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Name" class="form-label fw-bold"></label>
+                                <input asp-for="Name" class="form-control" placeholder="Full Name" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold d-block">Gender</label>
+                                <div class="mt-2">
+                                    @foreach (var item in Html.GetEnumSelectList<Gender>())
+                                    {
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" asp-for="Gender" value="@item.Text" id="gender_@item.Value" />
+                                            <label class="form-check-label" for="gender_@item.Value">@item.Text</label>
+                                        </div>
+                                    }
+                                </div>
+                                <span asp-validation-for="Gender" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h5 class="text-primary border-bottom pb-2 mb-3">Professional Details</h5>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Job Profile</label>
+                                <select asp-for="JobProfileId" id="JobProfileList" class="form-select" asp-items="@ViewBag.JobProfile">
+                                    <option value="-1">-- Select Job Profile --</option>
+                                </select>
+                                <span asp-validation-for="JobProfileId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Skills</label>
+                                <select asp-for="SkillsId" id="SkillsList" class="form-select" asp-items="@ViewBag.Skills">
+                                    <option value="-1">-- Select Skills --</option>
+                                </select>
+                                <span asp-validation-for="SkillsId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h5 class="text-primary border-bottom pb-2 mb-3">Contact & Security</h5>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="Email" class="form-label fw-bold"></label>
+                                <input asp-for="Email" class="form-control" placeholder="email@domain.com" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="Password" class="form-label fw-bold"></label>
+                                <input asp-for="Password" type="password" class="form-control" placeholder="••••••••" />
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label asp-for="Mobno" class="form-label fw-bold">Mobile</label>
+                                <input asp-for="Mobno" class="form-control" placeholder="Mobile No" />
+                                <span asp-validation-for="Mobno" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label asp-for="Age" class="form-label fw-bold"></label>
+                                <input asp-for="Age" class="form-control" placeholder="Age" />
+                                <span asp-validation-for="Age" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h5 class="text-primary border-bottom pb-2 mb-3">Location Information</h5>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Country</label>
+                                <select asp-for="CountryId" id="CountryList" class="form-select" asp-items="@ViewBag.Country">
+                                    <option value="-1">-- Select Country --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">State</label>
+                                <select asp-for="StateId" id="StatesList" class="form-select" asp-items="@ViewBag.State">
+                                    <option value="-1">-- Select State --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">City</label>
+                                <select asp-for="CityId" id="CitiesList" class="form-select" asp-items="@ViewBag.City">
+                                    <option value="-1">-- Select City --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h5 class="text-primary border-bottom pb-2 mb-3">Documents & Extra Details</h5>
+                            </div>
+    
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Profile Picture</label>
+                                <div class="input-group">
+                                    <input asp-for="ImageFile" id="ImageFile" type="file" class="form-control" accept="image/*">
+                                </div>
+                                @if (!string.IsNullOrEmpty(Model?.ImagePath))
+                                {
+                                    <div class="mt-2 text-center border p-2 rounded bg-white shadow-sm" style="width: fit-content;">
+                                        <img src="@Model.ImagePath" height="80" class="rounded" style="object-fit:cover;" />
+                                        <div class="small text-muted mt-1">Current Photo</div>
+                                    </div>
+                                }
+                                <input asp-for="ImagePath" hidden />
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Resume / CV (PDF/DOC)</label>
+                                <div class="input-group">
+                                    <input asp-for="ResumeFile" type="file" class="form-control" accept=".pdf,.doc,.docx">
+                                </div>
+                                @if (!string.IsNullOrEmpty(Model?.ResumePath))
+                                {
+                                    <div class="mt-2 p-2 rounded bg-light border border-success d-flex align-items-center" style="width: fit-content;">
+                                        <span class="fs-4 me-2">📄</span>
+                                        <div>
+                                            <a asp-action="ViewSecureResume" asp-route-id="@Model.EId" target="_blank" class="text-decoration-none fw-bold text-success">
+                                                🔒 View Secure Resume
+                                            </a>
+                                            <div class="small text-muted">Uploaded on Cloud</div>
+                                        </div>
+                                    </div>
+                                }
+                                <input asp-for="ResumePath" hidden />
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="Comment" class="form-label fw-bold"></label>
+                                <textarea asp-for="Comment" class="form-control" rows="3" placeholder="Brief summary..."></textarea>
+                                <span asp-validation-for="Comment" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end border-top pt-4">
+                            <a asp-action="Index" class="btn btn-outline-secondary px-4 me-md-2">🔙 Back to List</a>
+                            <button type="submit" id="btnSubmit" class="btn btn-primary btn-lg px-5 shadow">💾 @ViewBag.BT Profile</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.1/dist/browser-image-compression.js"></script>
+
+    <script>
+        @if (TempData["Message"] != null)
+        {
+            <text>alert("@TempData["Message"]");</text>
+        }
+        
+        $(document).ready(function () {
+        // 👉 1. Dropdown change logic (Country -> State)
+        $("#CountryList").on("change", function () {
+        $('#StatesList').empty().append('<option value="0">--Select States--</option>');
+        $('#CitiesList').empty().append('<option value="0">--Select City--</option>');
+
+        $.ajax({
+        type: "Post",
+        url: "/JobSeeker/GetStates",
+        data: { "CId": $('#CountryList').val() },
+        success: function (response) {
+        $.each(response, function () {
+        $("#StatesList").append($("<option></option>").val(this.value).html(this.text));
+        });
+        }
+        });
+        });
+
+        // 👉 2. State -> City
+        $("#StatesList").on("change", function () {
+        $('#CitiesList').empty().append('<option value="0">--Select City--</option>');
+        $.ajax({
+        type: "Post",
+        url: "/JobSeeker/GetCity",
+        data: { "StateId": $('#StatesList').val() },
+        success: function (response) {
+        $.each(response, function () {
+        $("#CitiesList").append($("<option></option>").val(this.value).html(this.text));
+        });
+        }
+        });
+        });
+
+        // 👉 3. JobProfile -> Skills
+        $("#JobProfileList").on("change", function () {
+        $('#SkillsList').empty().append('<option value="0">--Select Skills--</option>');
+        $.ajax({
+        type: "Post",
+        url: "/JobSeeker/GetSkills",
+        data: { "JPId": $('#JobProfileList').val() },
+        success: function (response) {
+        $.each(response, function () {
+        $("#SkillsList").append($("<option></option>").val(this.value).html(this.text));
+        });
+        }
+        });
+        });
+
+        // 🪄 4. NAYA JADU: IMAGE COMPRESSION BROWSER KE ANDAR
+        const imageFileInput = document.getElementById('ImageFile');
+        if (imageFileInput) {
+        imageFileInput.addEventListener('change', async function (event) {
+        const file = event.target.files[0];
+                    
+        // Agar file select nahi hui ya wo image nahi hai, toh aage mat badho
+        if (!file || !file.type.startsWith('image/')) {
+        return;
+        }
+
+        console.log('Original Size: ' + (file.size / 1024 / 1024).toFixed(2) + ' MB');
+
+        // Setting: Max size 300KB aur width 1500px tak rakhi hai text clear dikhane ke liye
+        const options = {
+        maxSizeMB: 0.3,
+        maxWidthOrHeight: 1500,
+        useWebWorker: true
+        };
+
+        try {
+        // Jab tak compress ho raha hai, submit button ko block karo
+        const btn = document.getElementById('btnSubmit');
+        if (btn) {
+        // Agar button exist karta hai, toh text change karo aur disable karo
+        btn.dataset.originalText = btn.innerHTML; // Purana text save kar liya
+        btn.innerHTML = '⏳ Compressing Image...';
+        btn.disabled = true;
+        }
+
+        // Asli Compression yahan chal raha hai!
+        const compressedFile = await imageCompression(file, options);
+        console.log('Compressed Size: ' + (compressedFile.size / 1024 / 1024).toFixed(2) + ' MB');
+
+        // Purani 10MB file ko form me se nikal kar nayi choti file replace kar do
+        const dataTransfer = new DataTransfer();
+        const newFile = new File([compressedFile], file.name, { type: compressedFile.type });
+        dataTransfer.items.add(newFile);
+        event.target.files = dataTransfer.files;
+
+        // Button ko wapas normal kar do
+        if (btn) {
+        btn.innerHTML = btn.dataset.originalText;
+        btn.disabled = false;
+        }
+
+        } catch (error) {
+        console.log("Compression mein error aaya:", error);
+        const btn = document.getElementById('btnSubmit');
+        if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = btn.dataset.originalText;
+        }
+        }
+        });
+        }
+        });
+    </script>
+}

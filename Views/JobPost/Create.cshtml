@@ -1,0 +1,110 @@
+﻿@model JobPortalCORE.Models.JobPost
+
+@{
+    ViewData["Title"] = ViewBag.BT ?? "Create Job Post";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-header bg-dark text-white py-3">
+                    <h4 class="mb-0">💼 @ViewBag.BT Job Post</h4>
+                </div>
+                
+                <div class="card-body p-4 p-md-5 bg-light">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
+                        @Html.HiddenFor(m => m.JobPostId)
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Job Profile <span class="text-danger">*</span></label>
+                            <select asp-for="JobProfileId" class="form-select" asp-items="@ViewBag.JopProfile">
+                                <option value="-1">-- Select Job Profile --</option>
+                            </select>
+                            <span asp-validation-for="JobProfileId" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="MinExp" class="form-label fw-bold">Minimum Experience</label>
+                                <div class="input-group">
+                                    <input asp-for="MinExp" class="form-control" placeholder="E.g. 1" />
+                                    <span class="input-group-text bg-white">Years</span>
+                                </div>
+                                <span asp-validation-for="MinExp" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="MaxExp" class="form-label fw-bold">Maximum Experience</label>
+                                <div class="input-group">
+                                    <input asp-for="MaxExp" class="form-control" placeholder="E.g. 5" />
+                                    <span class="input-group-text bg-white">Years</span>
+                                </div>
+                                <span asp-validation-for="MaxExp" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="MinSal" class="form-label fw-bold">Minimum Salary</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white">₹</span>
+                                    <input asp-for="MinSal" class="form-control" placeholder="20000" />
+                                </div>
+                                <span asp-validation-for="MinSal" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="MaxSal" class="form-label fw-bold">Maximum Salary</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white">₹</span>
+                                    <input asp-for="MaxSal" class="form-control" placeholder="50000" />
+                                </div>
+                                <span asp-validation-for="MaxSal" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="NoOfVac" class="form-label fw-bold">No. of Vacancies</label>
+                                <input asp-for="NoOfVac" class="form-control" placeholder="E.g. 5" />
+                                <span asp-validation-for="NoOfVac" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="NoticePeriod" class="form-label fw-bold">Notice Period</label>
+                                <div class="input-group">
+                                    <input asp-for="NoticePeriod" class="form-control" placeholder="E.g. 30" />
+                                    <span class="input-group-text bg-white">Days</span>
+                                </div>
+                                <span asp-validation-for="NoticePeriod" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Comment" class="form-label fw-bold"></label>
+                            <textarea asp-for="Comment" class="form-control" rows="3" placeholder="Requirements, skills ya baaki details yahan likhein..."></textarea>
+                            <span asp-validation-for="Comment" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="InsertedDate" class="form-label fw-bold">Date</label>
+                            <input asp-for="InsertedDate" type="date" class="form-control" />
+                            <span asp-validation-for="InsertedDate" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a asp-action="Index" class="btn btn-outline-secondary px-4 me-md-2">Back to List</a>
+                            <button type="submit" class="btn btn-primary px-5 fw-bold">💾 @ViewBag.BT</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,74 @@
+﻿@model IEnumerable<JobPortalCORE.Models.JobPost>
+
+@{
+    ViewData["Title"] = "Manage My Jobs";
+}
+
+<div class="container-fluid mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>📋 Manage Posted Jobs</h2>
+            <p class="text-muted">Yahan aap apni post ki hui sabhi jobs dekh aur manage kar sakte hain.</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary shadow-sm fw-bold">
+            ➕ Post New Job
+        </a>
+    </div>
+
+    <div class="table-responsive shadow-sm bg-white rounded p-3">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Experience</th>
+                    <th>Salary Offered</th>
+                    <th>Vacancies</th>
+                    <th>Notice Period</th>
+                    <th>@Html.DisplayNameFor(model => model.Comment)</th>
+                    <th>Posted Date</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="fw-bold">
+                            @item.MinExp - @item.MaxExp <span class="text-muted fw-normal">Yrs</span>
+                        </td>
+                        
+                        <td class="text-success fw-bold">
+                            ₹ @item.MinSal - ₹ @item.MaxSal
+                        </td>
+                        
+                        <td>
+                            <span class="badge bg-info text-dark">
+                                @item.NoOfVac Vacancies
+                            </span>
+                        </td>
+                        
+                        <td>
+                            @item.NoticePeriod <span class="text-muted small">Days</span>
+                        </td>
+                        
+                        <td style="word-break: break-all; min-width: 250px; font-size: 0.9em;">
+                            @Html.DisplayFor(modelItem => item.Comment)
+                        </td>
+                        
+                        <td>
+                            @Html.DisplayFor(modelItem => item.InsertedDate)
+                        </td>
+                        
+                        <td class="text-center" style="min-width: 150px;">
+                            <a asp-action="Create" asp-route-id="@item.JobPostId" class="btn btn-sm btn-outline-primary me-1">
+                                ✏️ Edit
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@item.JobPostId" class="btn btn-sm btn-danger" onclick="return confirm('Bhai, is job post ko sach mein delete karna hai?');">
+                                🗑️ Delete
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

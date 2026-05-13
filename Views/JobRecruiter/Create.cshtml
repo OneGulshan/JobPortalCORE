@@ -1,0 +1,70 @@
+﻿@model JobPortalCORE.Models.Company
+
+@{
+    ViewData["Title"] = ViewBag.BT ?? "Create Company";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-header bg-dark text-white py-3">
+                    <h4 class="mb-0">🏢 @ViewBag.BT Recruiter / Company</h4>
+                </div>
+                
+                <div class="card-body p-4 bg-light">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
+                        @Html.HiddenFor(m => m.Id)
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Job Profile <span class="text-danger">*</span></label>
+                            <select asp-for="JobProfileId" id="JobProfileList" class="form-select" asp-items="@ViewBag.JobProfile">
+                                <option value="-1">-- Select Job Profile --</option>
+                            </select>
+                            <span asp-validation-for="JobProfileId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label fw-bold">Company / Recruiter Name</label>
+                            <input asp-for="Name" class="form-control" placeholder="Enter company name" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Email" class="form-label fw-bold">Email Address</label>
+                                <input asp-for="Email" type="email" class="form-control" placeholder="example@company.com" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Password" class="form-label fw-bold">Password</label>
+                                <input asp-for="Password" type="password" class="form-control" placeholder="Enter strong password" />
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Comment" class="form-label fw-bold">About / Comment</label>
+                            <textarea asp-for="Comment" class="form-control" rows="3" placeholder="Company details or comments..."></textarea>
+                            <span asp-validation-for="Comment" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a asp-action="Index" class="btn btn-outline-secondary px-4 me-md-2">🔙 Back to List</a>
+                            <button type="submit" class="btn btn-primary px-5 fw-bold">💾 @ViewBag.BT</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

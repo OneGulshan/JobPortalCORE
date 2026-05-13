@@ -1,0 +1,106 @@
+﻿@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-11 col-lg-9">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="row g-0">
+                    
+                    <div class="col-md-5 bg-dark text-white d-flex flex-column justify-content-center p-4 p-md-5">
+                        <div class="mb-4">
+                            <h2 class="fw-bold">Join Us! 🚀</h2>
+                            <p class="opacity-75">Apna account banayein aur behtareen job opportunities ka maza lein.</p>
+                        </div>
+
+                        <ul class="list-unstyled mb-5">
+                            <li class="mb-3">✅ <span class="ms-2">Quick & Easy Apply</span></li>
+                            <li class="mb-3">✅ <span class="ms-2">Personalized Job Alerts</span></li>
+                            <li class="mb-3">✅ <span class="ms-2">Direct Chat with Recruiters</span></li>
+                        </ul>
+
+                        <hr class="border-light opacity-25">
+
+                        <div class="mt-auto">
+                            <p class="small mb-0">Pehle se account hai?</p>
+                            <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="btn btn-outline-light rounded-pill px-4 mt-2">Login Karein</a>
+                        </div>
+                    </div>
+
+                    <div class="col-md-7 p-4 p-md-5 bg-white">
+                        <div class="mb-4">
+                            <h3 class="fw-bold text-dark">Create Account</h3>
+                            <p class="text-muted small">Niche di gayi details bharein</p>
+                        </div>
+
+                        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                            <div asp-validation-summary="ModelOnly" class="text-danger small mb-3" role="alert"></div>
+
+                            <div class="form-floating mb-3">
+                                <input asp-for="Input.Email" class="form-control rounded-3" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                                <label asp-for="Input.Email">Email Address</label>
+                                <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        <input asp-for="Input.Password" class="form-control rounded-3" autocomplete="new-password" aria-required="true" placeholder="password" />
+                                        <label asp-for="Input.Password">Password</label>
+                                        <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        <input asp-for="Input.ConfirmPassword" class="form-control rounded-3" autocomplete="new-password" aria-required="true" placeholder="password" />
+                                        <label asp-for="Input.ConfirmPassword">Confirm</label>
+                                        <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary fw-bold rounded-pill shadow-sm mt-3 mb-4">
+                                Create Account
+                            </button>
+
+                            <div class="text-center">
+                                <div class="position-relative mb-4">
+                                    <hr>
+                                    <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">Ya fir inke zariye</span>
+                                </div>
+
+                                @{
+                                    if ((Model.ExternalLogins?.Count ?? 0) == 0)
+                                    {
+                                        <p class="small text-muted italic">Google/Facebook registration setup nahi hai.</p>
+                                    }
+                                    else
+                                    {
+                                        <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                                            <div class="d-flex justify-content-center gap-2">
+                                                @foreach (var provider in Model.ExternalLogins!)
+                                                {
+                                                    <button type="submit" class="btn btn-outline-dark rounded-pill px-4" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">
+                                                        @provider.DisplayName
+                                                    </button>
+                                                }
+                                            </div>
+                                        </form>
+                                    }
+                                }
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,131 @@
+﻿@model IEnumerable<JobPortalCORE.Models.Employee>
+
+@{
+    ViewData["Title"] = "Employee Directory";
+}
+
+<div class="container-fluid mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>🧑‍💼 Employee / Candidate Directory</h2>
+            <p class="text-muted">Yahan aap sabhi registered employees ki details dekh sakte hain.</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary shadow-sm fw-bold">
+            ➕ Register New Employee
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4 bg-light">
+        <div class="card-body">
+            <form asp-action="Index" method="get" class="row g-3 align-items-center">
+                <div class="col-auto">
+                    <label class="fw-bold text-dark">Filter by City (Cloud Search):</label>
+                </div>
+                <div class="col-md-4">
+                    <input type="text" name="searchCity" class="form-control"
+                           placeholder="e.g. New Delhi" value="@ViewBag.CurrentSearch" />
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-dark px-4">Search 🔍</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+                </div>
+                <div class="col-auto ms-auto">
+                    <span class="badge bg-info text-dark p-2">
+                        ⚡ Powered by Azure Blob Indexing
+                    </span>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="table-responsive shadow-sm bg-white rounded p-3">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th class="text-center" style="width: 80px;">Photo</th>
+                    <th>@Html.DisplayNameFor(model => model.Name)</th>
+                    <th>@Html.DisplayNameFor(model => model.Gender)</th>
+                    <th>Mobile No.</th>
+                    <th>@Html.DisplayNameFor(model => model.Age)</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            Bhai, is criteria mein koi employee nahi mila! 😅
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="text-center">
+                                @if (!string.IsNullOrEmpty(item.ImagePath))
+                                {
+                                    <img src="@item.ImagePath" alt="Profile" class="rounded-circle shadow-sm"
+                                         style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #ddd;"
+                                         onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/512/3256/3256972.png'; this.title='Robot photo process kar raha hai... thodi der me refresh karein!';" />
+                                }
+                                else
+                                {
+                                    <div class="bg-light rounded-circle d-inline-block text-muted shadow-sm" style="width: 50px; height: 50px; line-height: 50px; font-size: 12px; border: 1px solid #ddd;">
+                                        No Pic
+                                    </div>
+                                }
+                            </td>
+                            <td class="fw-bold">@Html.DisplayFor(modelItem => item.Name)</td>
+                            <td>
+                                <span class="badge @(item.Gender.ToString() == "Male" ? "bg-primary-subtle text-primary" : "bg-danger-subtle text-danger") border">
+                                    @Html.DisplayFor(modelItem => item.Gender)
+                                </span>
+                            </td>
+                            <td>@Html.DisplayFor(modelItem => item.Mobno)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Age) <span class="text-muted small">Years</span></td>
+                            
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center gap-1">
+                                    <a asp-action="Create" asp-route-id="@item.EId" class="btn btn-sm btn-outline-primary">
+                                        ✏️ Edit
+                                    </a>
+                                    
+                                    @if (!string.IsNullOrEmpty(item.ResumePath))
+                                    {
+                                        <form asp-action="ShortlistCandidate" asp-route-id="@item.EId" method="post" style="display:inline;">
+                                            <button type="submit" class="btn btn-sm btn-success"
+                                                    onclick="return confirm('Is candidate ko shortlist karke metadata update karna hai?');">
+                                                ✅ Shortlist (Lock)
+                                            </button>
+                                        </form>
+                                    }
+                                    
+                                    <a asp-action="Delete" asp-route-id="@item.EId" class="btn btn-sm btn-danger"
+                                           onclick="return confirm('Bhai, is employee profile ko sach mein delete karna hai?');">
+                                        🗑️ Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        @if (TempData["Message"] != null)
+        {
+                    <text>alert("@TempData["Message"]");</text>
+        }
+        @if (TempData["Error"] != null)
+        {
+                    <text>alert("@TempData["Error"]");</text>
+        }
+    </script>
+}

@@ -1,0 +1,63 @@
+﻿@model IEnumerable<JobPortalCORE.Models.AuditLog>
+
+@{
+    ViewData["Title"] = "Audit History";
+}
+
+<div class="container mt-4">
+    <h2>🕵️‍♂️ Audit History (CCTV Room)</h2>
+    <p class="text-muted">Database mein hui saari halchal (Insert/Update/Delete) yahan record hoti hai.</p>
+
+    <div class="table-responsive mt-3">
+        <table class="table table-bordered table-hover shadow-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th>Date & Time</th>
+                    <th>User ID</th>
+                    <th>Table</th>
+                    <th>Action</th>
+                    <th style="width: 25%;">Old Data</th>
+                    <th style="width: 25%;">New Data</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Timestamp.ToLocalTime().ToString("dd-MMM-yyyy hh:mm tt")</td>
+                        
+                        <td>@item.UserId</td>
+                        
+                        <td><span class="badge bg-info text-dark">@item.TableName</span></td>
+                        
+                        <td>
+                            @if (item.Action == "Added")
+                            {
+                                <span class="badge bg-success">Inserted</span>
+                            }
+                            else if (item.Action == "Modified")
+                            {
+                                <span class="badge bg-warning text-dark">Updated</span>
+                            }
+                            else if (item.Action == "Deleted")
+                            {
+                                <span class="badge bg-danger">Deleted</span>
+                            }
+                            else
+                            {
+                                <span>@item.Action</span>
+                            }
+                        </td>
+                        
+                        <td style="word-break: break-all; font-size: 0.85em; color: #dc3545;">
+                            @item.OldValues
+                        </td>
+                        <td style="word-break: break-all; font-size: 0.85em; color: #198754;">
+                            @item.NewValues
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
