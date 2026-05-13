@@ -1,4 +1,3 @@
 <Solution>
-  <Project Path="../JobPortalBackgroundWorker/JobPortalBackgroundWorker.csproj" Id="f5bc683c-936b-47bf-bfc9-3cbc3ac7097f" />
   <Project Path="JobPortalCORE.csproj" />
 </Solution>
