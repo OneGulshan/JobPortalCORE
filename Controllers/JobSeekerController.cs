@@ -102,10 +102,12 @@ namespace JobPortalCORE.Controllers
         {
             if (id == 0) // --- CREATE NEW EMPLOYEE ---
             {
-                // 1. Profile Image Upload (Seedha izmages me compress hoke save hogi)
+                // 1. Profile Image Upload (Seedha raw file 'izmages' me jayegi)
                 if (employee.ImageFile != null)
                 {
-                    employee.ImagePath = await UploadToBlobAsync(employee.ImageFile, "izmages", employee);
+                    string rawUrl = await UploadToBlobAsync(employee.ImageFile, "izmages", employee);
+                    // 🪄 JADU: DB mein save hone se pehle link badal do!
+                    employee.ImagePath = rawUrl.Replace("/izmages/", "/compressed-images/");
                 }
 
                 // 2. Resume Upload 
@@ -144,16 +146,19 @@ namespace JobPortalCORE.Controllers
                     existingEmployee.Password = employee.Password;
                 }
 
-                // 👉 Handle Image Update & Deletion (1 Container Logic)
+                // 👉 Handle Image Update & Deletion
                 if (employee.ImageFile != null)
                 {
-                    // Purani izmages wali photo uda do
                     if (!string.IsNullOrEmpty(existingEmployee.ImagePath))
                     {
-                        await DeleteBlobAsync(existingEmployee.ImagePath, "izmages");
+                        // Purani file compressed wale container se udhani hai
+                        await DeleteBlobAsync(existingEmployee.ImagePath, "compressed-images");
                     }
-                    // Nayi photo izmages me upload kar do
-                    existingEmployee.ImagePath = await UploadToBlobAsync(employee.ImageFile, "izmages", employee);
+
+                    // Nayi photo pehle 'izmages' mein upload karo
+                    string rawUrl = await UploadToBlobAsync(employee.ImageFile, "izmages", employee);
+                    // 🪄 JADU: DB mein save hone se pehle link badal do!
+                    existingEmployee.ImagePath = rawUrl.Replace("/izmages/", "/compressed-images/");
                 }
 
                 // 👉 Handle Resume Update & Deletion
@@ -173,7 +178,7 @@ namespace JobPortalCORE.Controllers
             return RedirectToAction("Index");
         }
 
-        // 👈 1 CONTAINER LOGIC: Upload + Compression sab yahan hoga
+        // 👈 NAYA LOGIC: Sirf file upload karega, compression Azure Function karega
         private async Task<string> UploadToBlobAsync(IFormFile file, string containerName, Employee employee)
         {
             string connectionString = _configuration.GetConnectionString("BlobConnectionString");
@@ -218,44 +223,15 @@ namespace JobPortalCORE.Controllers
                 Metadata = metadata
             };
 
+            // 🚀 FAST UPLOAD (Bina ruke seedha cloud par phek do, compression gaya bhaad me)
             using (var stream = file.OpenReadStream())
             {
-                // 🪄 JADU: Agar Image hai, toh pehle compress karo phir upload
-                if (ext == ".jpg" || ext == ".jpeg" || ext == ".png")
-                {
-                    using (SixLabors.ImageSharp.Image image = await SixLabors.ImageSharp.Image.LoadAsync(stream))
-                    {
-                        image.Mutate(x => x.Resize(new SixLabors.ImageSharp.Processing.ResizeOptions
-                        {
-                            Size = new SixLabors.ImageSharp.Size(1500, 0),
-                            Mode = SixLabors.ImageSharp.Processing.ResizeMode.Max
-                        }));
-
-                        using (var outputStream = new MemoryStream())
-                        {
-                            if (ext == ".png")
-                            {
-                                await image.SaveAsync(outputStream, new SixLabors.ImageSharp.Formats.Png.PngEncoder());
-                            }
-                            else
-                            {
-                                await image.SaveAsync(outputStream, new SixLabors.ImageSharp.Formats.Jpeg.JpegEncoder() { Quality = 80 });
-                            }
-
-                            outputStream.Position = 0;
-                            await blobClient.UploadAsync(outputStream, options);
-                        }
-                    }
-                }
-                else
-                {
-                    // 📄 Agar PDF (Resume) hai, toh bina chhede seedha upload
-                    await blobClient.UploadAsync(stream, options);
-                }
+                await blobClient.UploadAsync(stream, options);
             }
 
             return blobClient.Uri.ToString();
         }
+
         private async Task DeleteBlobAsync(string fileUrl, string containerName)
         {
             try
