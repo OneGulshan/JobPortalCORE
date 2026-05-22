@@ -5,6 +5,7 @@ using Azure.Storage.Sas;
 using JobPortalCORE.Data;
 using JobPortalCORE.Models;
 using JobPortalCORE.ViewModels;
+using JobPortalCORE.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -50,6 +51,17 @@ namespace JobPortalCORE.Controllers
                 ViewBag.CurrentSearch = searchCity; // Search box mein naam dikhane ke liye
             }
 
+            // 🔥 4. PRIVATE IMAGES KE LIYE SECURE SAS URL GENERATE KARO 🔥
+            foreach (var emp in employees)
+            {
+                if (!string.IsNullOrEmpty(emp.ImagePath))
+                {
+                    // DB wali normal URL ko 1-hour wali secure SAS URL se replace kar rahe hain
+                    // Note: DB mein save nahi kar rahe, sirf View ko dikhane ke liye change kar rahe hain
+                    emp.ImagePath = GenerateSecureImageUrl(emp.ImagePath, "compressed-images");
+                }
+            }
+
             return View(employees);
         }
 
@@ -65,6 +77,16 @@ namespace JobPortalCORE.Controllers
                 GetStates(Employee.CountryId);
                 GetCity(Employee.StateId);
                 ViewBag.Bt = "Update";
+                ViewBag.SecureImageUrl = Employee.ImagePath; // Default set kar do
+
+                if (!string.IsNullOrEmpty(Employee.ImagePath) && Employee.ImagePath.Contains("blob.core.windows.net"))
+                {
+                    BlobService blobService = new BlobService();
+
+                    string fileName = Path.GetFileName(new Uri(Employee.ImagePath).LocalPath);
+
+                    ViewBag.SecureImageUrl = blobService.GetResumeSecureUrl(fileName); // Yahan container name 'compressed-images' pass karne wala method use karna
+                }
                 return View(Employee);
             }
             else
@@ -464,6 +486,49 @@ namespace JobPortalCORE.Controllers
                 // Agar koi aur ganda error ho (jaise net chala gaya), toh throw karo
                 throw;
             }
+        }
+
+        // 💡 Helper Method to generate Secure SAS Link specifically for Images (Display)
+        private string GenerateSecureImageUrl(string originalBlobUrl, string containerName)
+        {
+            if (string.IsNullOrEmpty(originalBlobUrl))
+                return null;
+
+            try
+            {
+                string connectionString = _configuration.GetConnectionString("BlobConnectionString");
+                BlobContainerClient containerClient = new BlobContainerClient(connectionString, containerName);
+
+                Uri uri = new Uri(originalBlobUrl);
+                string blobName = Path.GetFileName(uri.LocalPath);
+                BlobClient blobClient = containerClient.GetBlobClient(blobName);
+
+                // Check if we can generate SAS (True if we connect using Account Key)
+                if (blobClient.CanGenerateSasUri)
+                {
+                    // 🎫 Yahan hum Image ke liye temporary ticket (1 hour) bana rahe hain
+                    BlobSasBuilder sasBuilder = new BlobSasBuilder()
+                    {
+                        BlobContainerName = containerName,
+                        BlobName = blobName,
+                        Resource = "b", // b = blob
+                        ExpiresOn = DateTimeOffset.UtcNow.AddHours(1), // Ek ghante ke liye URL valid
+                    };
+
+                    // Sirf 'Read' ki permission de rahe hain
+                    sasBuilder.SetPermissions(BlobSasPermissions.Read);
+
+                    // Naya secure URL generate karo jo <img> tag mein chale
+                    Uri sasUri = blobClient.GenerateSasUri(sasBuilder);
+                    return sasUri.ToString();
+                }
+            }
+            catch (Exception)
+            {
+                // Agar koi issue aaya (jaise blob ka naam galat hai), toh null do
+            }
+
+            return null;
         }
         #endregion Azure Blob Storage Learning End
 

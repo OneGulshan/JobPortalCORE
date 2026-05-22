@@ -11,7 +11,7 @@
                 <div class="card-header bg-primary text-white py-3">
                     <h4 class="mb-0">🧑‍💼 @ViewBag.BT Employee Profile</h4>
                 </div>
-                
+
                 <div class="card-body p-4 p-md-5 bg-light">
                     <form method="post" asp-action="Create" enctype="multipart/form-data">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
@@ -115,8 +115,8 @@
                             <div class="col-md-12">
                                 <h5 class="text-primary border-bottom pb-2 mb-3">Documents & Extra Details</h5>
                             </div>
-    
-                            <div class="col-md-4 mb-3">
+
+                            @* <div class="col-md-4 mb-3">
                                 <label class="form-label fw-bold">Profile Picture</label>
                                 <div class="input-group">
                                     <input asp-for="ImageFile" id="ImageFile" type="file" class="form-control" accept="image/*">
@@ -129,8 +129,24 @@
                                     </div>
                                 }
                                 <input asp-for="ImagePath" hidden />
-                            </div>
+                            </div> *@
 
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Profile Picture</label>
+                                <div class="input-group">
+                                    <input asp-for="ImageFile" id="ImageFile" type="file" class="form-control" accept="image/*">
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(Model?.ImagePath))
+                                {
+                                    <div class="mt-2 text-center border p-2 rounded bg-white shadow-sm" style="width: fit-content;">
+                                        <img src="@ViewBag.SecureImageUrl" height="80" class="rounded" style="object-fit:cover;" onerror="this.src='/images/default-avatar.png';" />
+                                        <div class="small text-muted mt-1">Current Photo</div>
+                                    </div>
+                                }
+
+                                <input asp-for="ImagePath" hidden />
+                            </div>
                             <div class="col-md-4 mb-3">
                                 <label class="form-label fw-bold">Resume / CV (PDF/DOC)</label>
                                 <div class="input-group">
@@ -173,7 +189,7 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-    
+
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.1/dist/browser-image-compression.js"></script>
 
     <script>
@@ -181,7 +197,7 @@
         {
             <text>alert("@TempData["Message"]");</text>
         }
-        
+
         $(document).ready(function () {
         // 👉 1. Dropdown change logic (Country -> State)
         $("#CountryList").on("change", function () {
@@ -235,7 +251,7 @@
         if (imageFileInput) {
         imageFileInput.addEventListener('change', async function (event) {
         const file = event.target.files[0];
-                    
+
         // Agar file select nahi hui ya wo image nahi hai, toh aage mat badho
         if (!file || !file.type.startsWith('image/')) {
         return;
