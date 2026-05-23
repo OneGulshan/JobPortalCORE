@@ -16,6 +16,9 @@ builder.Services.AddControllersWithViews(options =>
     // Ye line poore project ke controllers par guard laga degi
     options.Filters.Add<GlobalExceptionFilter>();
 });
+
+builder.Services.AddApplicationInsightsTelemetry();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
