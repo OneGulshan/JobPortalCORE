@@ -2,18 +2,15 @@ using JobPortalCORE.Models;
 using JobPortalCORE.Data;
 using JobPortalCORE.Filters;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection; // (Ye agar pehle se hai toh theek)
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Database & Identity Services
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Add services to the container.
+builder.Services.AddControllersWithViews();
+builder.Services.AddDbContext<AppDbContext>(options => 
+options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddDefaultIdentity<ApplicationUser>()
-    .AddEntityFrameworkStores<AppDbContext>();
-
-// 2. Controllers & Pages (Dono ko mila diya)
+builder.Services.AddDefaultIdentity<ApplicationUser>().AddEntityFrameworkStores<AppDbContext>();
 builder.Services.AddRazorPages();
 builder.Services.AddControllersWithViews(options =>
 {
@@ -21,17 +18,15 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.Add<GlobalExceptionFilter>();
 });
 
-// 3. Application Insights (BILKUL SAHI JAGAH PAR HAI!)
 builder.Services.AddApplicationInsightsTelemetry();
 
-// ----------------------------------------------------
 var app = builder.Build();
-// ----------------------------------------------------
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -41,7 +36,6 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapRazorPages();
 app.MapControllerRoute(
     name: "default",
