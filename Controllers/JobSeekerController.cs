@@ -15,6 +15,8 @@ using System.Net;
 using System.Net.Mail;
 using Azure.Messaging.ServiceBus;
 using System.Text.Json;
+using Azure;
+using Azure.AI.FormRecognizer.DocumentAnalysis;
 
 namespace JobPortalCORE.Controllers
 {
@@ -722,6 +724,123 @@ namespace JobPortalCORE.Controllers
             }
 
             return View(vm);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ParseResumeQuick(IFormFile resumeFile)
+        {
+            if (resumeFile == null || resumeFile.Length == 0)
+                return Json(new { success = false, message = "Bhai file toh upload kar!" });
+
+            try
+            {
+                string endpoint = _configuration["AzureAI:Endpoint"];
+                string apiKey = _configuration["AzureAI:ApiKey"];
+
+                var credential = new AzureKeyCredential(apiKey);
+                var client = new DocumentAnalysisClient(new Uri(endpoint), credential);
+
+                using var stream = resumeFile.OpenReadStream();
+
+                // 🧠 THE MAGIC: Azure AI ka 'prebuilt-document' model PDF ko padhega
+                AnalyzeDocumentOperation operation = await client.AnalyzeDocumentAsync(WaitUntil.Completed, "prebuilt-document", stream);
+                AnalyzeResult result = operation.Value;
+
+                string candidateName = "";
+                string candidateEmail = "";
+                string candidatePhone = "";
+
+                // 👉 STEP 1: Key-Value Pair Check (Standard check)
+                foreach (var kvp in result.KeyValuePairs)
+                {
+                    if (kvp.Value == null) continue;
+                    string keyText = kvp.Key.Content.ToLower();
+                    string valueText = kvp.Value.Content;
+
+                    if ((keyText.Contains("email") || keyText.Contains("e-mail")) && string.IsNullOrEmpty(candidateEmail))
+                        candidateEmail = valueText;
+                    else if ((keyText.Contains("phone") || keyText.Contains("mobile") || keyText.Contains("contact")) && string.IsNullOrEmpty(candidatePhone))
+                        candidatePhone = valueText;
+                    else if ((keyText.Contains("name") || keyText.Contains("full name")) && string.IsNullOrEmpty(candidateName))
+                        candidateName = valueText;
+                }
+
+                // 🚀 STEP 2: RAW TEXT & REGEX FALLBACK (Agar upar wala fail ho jaye)
+                string fullText = result.Content;
+
+                // A. Email Filter
+                if (string.IsNullOrEmpty(candidateEmail))
+                {
+                    var emailMatch = System.Text.RegularExpressions.Regex.Match(fullText, @"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}");
+                    if (emailMatch.Success) candidateEmail = emailMatch.Value;
+                }
+
+                // B. Phone Filter
+                if (string.IsNullOrEmpty(candidatePhone))
+                {
+                    var phoneMatch = System.Text.RegularExpressions.Regex.Match(fullText, @"(\+?\d{1,3}[- ]?)?\d{10}");
+                    if (phoneMatch.Success) candidatePhone = phoneMatch.Value;
+                }
+
+                // 🎯 C. Name Filter (With Smart Cleaning & Professional Title Filter Layer)
+                if (string.IsNullOrEmpty(candidateName) && result.Paragraphs.Count > 0)
+                {
+                    // Shuru ki 5 lines check karenge
+                    for (int i = 0; i < Math.Min(5, result.Paragraphs.Count); i++)
+                    {
+                        string text = result.Paragraphs[i].Content.Trim();
+
+                        // Logic 1: Agar AI ne line-break `\n` ke sath text uthaya hai, toh pehli line alag karo
+                        if (text.Contains("\n"))
+                        {
+                            text = text.Split('\n')[0].Trim();
+                        }
+
+                        // Insaan ke naam mein numbers ya @ nahi hote
+                        if (text.Length > 2 && text.Length <= 50 && !text.Contains("@") && !System.Text.RegularExpressions.Regex.IsMatch(text, @"\d"))
+                        {
+                            if (!text.ToLower().Contains("resume") && !text.ToLower().Contains("curriculum vitae"))
+                            {
+                                // 🔥 THE CLEANING LAYER: Common designations ki block-list
+                                string[] commonTitles = {
+                            "software developer", "software engineer", "developer",
+                            "engineer", "programmer", "analyst", "fresher", "ui/ux tester"
+                        };
+
+                                // Agar text mein inme se koi bhi word mile, toh use aur uske aage ka sab saaf kar do
+                                foreach (var title in commonTitles)
+                                {
+                                    if (text.ToLower().Contains(title))
+                                    {
+                                        int index = text.ToLower().IndexOf(title);
+                                        text = text.Substring(0, index).Trim(); // Sirf naam bachega
+                                    }
+                                }
+
+                                // Sab kuch saaf karne ke baad agar text abhi bhi valid hai, toh yahi naam hai!
+                                if (text.Length > 2)
+                                {
+                                    candidateName = text;
+                                    break; // Loop se bahar niklo
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // JS/Ajax ko cleaned data wapas bhejo
+                return Json(new
+                {
+                    success = true,
+                    name = candidateName,
+                    email = candidateEmail,
+                    phone = candidatePhone
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"AI ka dimaag garam ho gaya: {ex.Message}" });
+            }
         }
     }
 }

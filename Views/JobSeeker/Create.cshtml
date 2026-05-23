@@ -116,21 +116,6 @@
                                 <h5 class="text-primary border-bottom pb-2 mb-3">Documents & Extra Details</h5>
                             </div>
 
-                            @* <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">Profile Picture</label>
-                                <div class="input-group">
-                                    <input asp-for="ImageFile" id="ImageFile" type="file" class="form-control" accept="image/*">
-                                </div>
-                                @if (!string.IsNullOrEmpty(Model?.ImagePath))
-                                {
-                                    <div class="mt-2 text-center border p-2 rounded bg-white shadow-sm" style="width: fit-content;">
-                                        <img src="@Model.ImagePath" height="80" class="rounded" style="object-fit:cover;" />
-                                        <div class="small text-muted mt-1">Current Photo</div>
-                                    </div>
-                                }
-                                <input asp-for="ImagePath" hidden />
-                            </div> *@
-
                             <div class="col-md-4 mb-3">
                                 <label class="form-label fw-bold">Profile Picture</label>
                                 <div class="input-group">
@@ -147,11 +132,21 @@
 
                                 <input asp-for="ImagePath" hidden />
                             </div>
+
                             <div class="col-md-4 mb-3">
                                 <label class="form-label fw-bold">Resume / CV (PDF/DOC)</label>
                                 <div class="input-group">
-                                    <input asp-for="ResumeFile" type="file" class="form-control" accept=".pdf,.doc,.docx">
+                                    <input asp-for="ResumeFile" id="resumeInput" type="file" class="form-control" accept=".pdf,.doc,.docx">
                                 </div>
+
+                                <button type="button" class="btn btn-warning mt-2 fw-bold w-100 shadow-sm" id="btnAiParse">
+                                    🧠 Auto-Fill with AI
+                                </button>
+                                <div id="aiLoading" class="text-primary mt-1 small fw-bold" style="display: none;">
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    AI Resume padh raha hai, 2 second ruk...
+                                </div>
+
                                 @if (!string.IsNullOrEmpty(Model?.ResumePath))
                                 {
                                     <div class="mt-2 p-2 rounded bg-light border border-success d-flex align-items-center" style="width: fit-content;">
@@ -192,13 +187,27 @@
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.1/dist/browser-image-compression.js"></script>
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
     <script>
         @if (TempData["Message"] != null)
         {
-            <text>alert("@TempData["Message"]");</text>
+            <text>
+                toastr.info("@TempData["Message"]");
+            </text>
         }
 
         $(document).ready(function () {
+
+        // Toaster Options
+        toastr.options = {
+        "closeButton": true,
+        "positionClass": "toast-top-right",
+        "timeOut": "5000",
+        "progressBar": true
+        };
+
         // 👉 1. Dropdown change logic (Country -> State)
         $("#CountryList").on("change", function () {
         $('#StatesList').empty().append('<option value="0">--Select States--</option>');
@@ -246,20 +255,18 @@
         });
         });
 
-        // 🪄 4. NAYA JADU: IMAGE COMPRESSION BROWSER KE ANDAR
+        // 🪄 4. IMAGE COMPRESSION BROWSER KE ANDAR
         const imageFileInput = document.getElementById('ImageFile');
         if (imageFileInput) {
         imageFileInput.addEventListener('change', async function (event) {
         const file = event.target.files[0];
 
-        // Agar file select nahi hui ya wo image nahi hai, toh aage mat badho
         if (!file || !file.type.startsWith('image/')) {
         return;
         }
 
         console.log('Original Size: ' + (file.size / 1024 / 1024).toFixed(2) + ' MB');
 
-        // Setting: Max size 300KB aur width 1500px tak rakhi hai text clear dikhane ke liye
         const options = {
         maxSizeMB: 0.3,
         maxWidthOrHeight: 1500,
@@ -267,26 +274,21 @@
         };
 
         try {
-        // Jab tak compress ho raha hai, submit button ko block karo
         const btn = document.getElementById('btnSubmit');
         if (btn) {
-        // Agar button exist karta hai, toh text change karo aur disable karo
-        btn.dataset.originalText = btn.innerHTML; // Purana text save kar liya
+        btn.dataset.originalText = btn.innerHTML;
         btn.innerHTML = '⏳ Compressing Image...';
         btn.disabled = true;
         }
 
-        // Asli Compression yahan chal raha hai!
         const compressedFile = await imageCompression(file, options);
         console.log('Compressed Size: ' + (compressedFile.size / 1024 / 1024).toFixed(2) + ' MB');
 
-        // Purani 10MB file ko form me se nikal kar nayi choti file replace kar do
         const dataTransfer = new DataTransfer();
         const newFile = new File([compressedFile], file.name, { type: compressedFile.type });
         dataTransfer.items.add(newFile);
         event.target.files = dataTransfer.files;
 
-        // Button ko wapas normal kar do
         if (btn) {
         btn.innerHTML = btn.dataset.originalText;
         btn.disabled = false;
@@ -302,6 +304,55 @@
         }
         });
         }
+
+        // 🧠 5. THE AI MAGIC: AUTO-FILL LOGIC
+        $('#btnAiParse').click(function () {
+        var fileInput = document.getElementById('resumeInput');
+
+        // File check karo
+        if (fileInput.files.length === 0) {
+        toastr.warning("Bhai, pehle ek PDF resume toh select kar le!");
+        return;
+        }
+
+        var formData = new FormData();
+        formData.append("resumeFile", fileInput.files[0]);
+
+        // Button loading state
+        $('#btnAiParse').prop('disabled', true);
+        $('#aiLoading').fadeIn();
+
+        // Backend call
+        $.ajax({
+        url: '/JobSeeker/ParseResumeQuick',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (response) {
+        // Reset button UI
+        $('#btnAiParse').prop('disabled', false);
+        $('#aiLoading').fadeOut();
+
+        if (response.success) {
+        toastr.success("AI ne successfully resume padh liya! 🎯");
+
+        // 🪄 Form Inputs ko bharna
+        if (response.name) $('#Name').val(response.name);
+        if (response.email) $('#Email').val(response.email);
+        if (response.phone) $('#Mobno').val(response.phone);
+        } else {
+        toastr.error(response.message);
+        }
+        },
+        error: function () {
+        $('#btnAiParse').prop('disabled', false);
+        $('#aiLoading').fadeOut();
+        toastr.error("Backend server se connect nahi ho paya!");
+        }
+        });
+        });
+
         });
     </script>
 }
