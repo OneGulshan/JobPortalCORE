@@ -1,6 +1,8 @@
-using JobPortalCORE.Models;
+using Hangfire;
 using JobPortalCORE.Data;
 using JobPortalCORE.Filters;
+using JobPortalCORE.Models;
+using JobPortalCORE.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,7 +20,21 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.Add<GlobalExceptionFilter>();
 });
 
+// Azure Application Insights Telemetry ko runtime par chalu karne ke liye
 builder.Services.AddApplicationInsightsTelemetry();
+
+// 👇 Hangfire Service register karo aur use SQL Server database se jodo
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Background server chalu karo jo tasks ko execute karega
+builder.Services.AddHangfireServer();
+
+// 👇 Ye tere background postman (Receiver) ko chalu kar dega
+builder.Services.AddHostedService<ServiceBusReceiverWorker>();
 
 var app = builder.Build();
 
@@ -36,6 +52,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseHangfireDashboard();
 app.MapRazorPages();
 app.MapControllerRoute(
     name: "default",

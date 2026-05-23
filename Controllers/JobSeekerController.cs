@@ -2,16 +2,19 @@
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs.Specialized;
 using Azure.Storage.Sas;
+using Hangfire;
 using JobPortalCORE.Data;
 using JobPortalCORE.Models;
-using JobPortalCORE.ViewModels;
 using JobPortalCORE.Services;
+using JobPortalCORE.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SixLabors.ImageSharp.Processing;
 using System.Net;
 using System.Net.Mail;
+using Azure.Messaging.ServiceBus;
+using System.Text.Json;
 
 namespace JobPortalCORE.Controllers
 {
@@ -508,6 +511,50 @@ namespace JobPortalCORE.Controllers
         }
         #endregion Azure Blob Storage Learning End
 
+        #region Azure Service Bus Start
+        [HttpPost]
+        public async Task<IActionResult> ApplyViaServiceBus(Message messageDetails)
+        {
+            // 1. Chithi ka masala taiyar karo (Form ke data ko JSON string banao)
+            var messagePayload = new
+            {
+                CandidateName = messageDetails.Name,
+                CandidateEmail = messageDetails.Email,
+                UserMessage = messageDetails.MessageData,
+                AppliedAt = DateTime.UtcNow
+            };
+            string messageBody = JsonSerializer.Serialize(messagePayload);
+
+            // 2. Service Bus par message phekne ka jadoo
+            string connectionString = _configuration.GetConnectionString("ServiceBusConnectionString");
+            string queueName = "job-queue"; // Jo naam portal par rakha tha
+
+            // Helper method call (Jo tune pehle hi bana rakha hai)
+            await Skinner_SendMessageToQueueAsync(connectionString, queueName, messageBody);
+
+            // 3. UI par Success Toaster dikhane ke liye aur form clear karne ke liye
+            ModelState.Clear();
+            ViewBag.Message = "Cloud Architecture Jadoo! Aapka data successfully Service Bus Queue mein chala gaya 🚀";
+
+            // Yahan apne view ka naam daal dena (jaise "MailSent")
+            return View("MailSent");
+        }
+
+        // 📮 Helper Method: Jo cloud par message deliver karega
+        private async Task Skinner_SendMessageToQueueAsync(string connectionString, string queueName, string messageBody)
+        {
+            // Client aur Sender ko create karo
+            await using var client = new ServiceBusClient(connectionString);
+            ServiceBusSender sender = client.CreateSender(queueName);
+
+            // Message object banao
+            ServiceBusMessage message = new ServiceBusMessage(messageBody);
+
+            // Cloud par phek do!
+            await sender.SendMessageAsync(message);
+        }
+        #endregion Azure Service Bus End
+
         public JsonResult GetSkills(int JPId) => Json(ViewBag.Skills = new SelectList(_context.Skills.Where(_ => _.JPId == JPId).ToList(), "SklId", "Name"));
 
         public JsonResult GetStates(int CId) => Json(ViewBag.State = new SelectList(_context.States.Where(_ => _.CId == CId).ToList(), "SId", "Name"));
@@ -557,48 +604,82 @@ namespace JobPortalCORE.Controllers
         public IActionResult MailSent() => View();
 
         [HttpPost]
-        public IActionResult MailSent(Message messageDetails)
+        public async Task<IActionResult> MailSent(Message messageDetails)
+        {
+            // 🚀 1. HANGFIRE KA JADOO (Email ko background queue mein daalo)
+            BackgroundJob.Enqueue(() => SendEmailInBackground(messageDetails.Name, messageDetails.Email, messageDetails.MessageData));
+
+            // 📦 2. SERVICE BUS KA MASALA (Data ko JSON string banao)
+            var messagePayload = new
+            {
+                CandidateName = messageDetails.Name,
+                CandidateEmail = messageDetails.Email,
+                UserMessage = messageDetails.MessageData,
+                AppliedAt = DateTime.UtcNow
+            };
+            string messageBody = JsonSerializer.Serialize(messagePayload);
+
+            // ☁️ 3. SERVICE BUS PAR BHEJNE KA CODE
+            string connectionString = _configuration.GetConnectionString("ServiceBusConnectionString");
+            string queueName = "job-queue"; // Tera postbox ka naam
+
+            // Yahan 'await' zaroori hai kyunki cloud par data jaa raha hai
+            await Skinner_SendMessageToQueueAsync(connectionString, queueName, messageBody);
+
+            // 🟢 4. UI PAR SUCCESS TOASTER DIKHANE KE LIYE
+            ModelState.Clear();
+            ViewBag.Message = "Double Jadoo! Email Hangfire mein lag gayi aur Data Service Bus Queue mein chala gaya 🚀";
+
+            return View();
+        }
+
+        #region Hangfire Email In Background Send Start
+        // 👨‍🍳 THE CHEF (Ye method background mein aaram se chalega)
+        // Note: Hangfire ke liye method Public hona chahiye
+        public void SendEmailInBackground(string name, string email, string messageData)
         {
             MailMessage message = new();
             SmtpClient smtpClientsmtp = new();
             message.From = new MailAddress("gulshankumar.mailid01@gmail.com");
-            message.To.Add(messageDetails.Email);
-            message.Subject = "Test Mail";
+            message.To.Add(email);
+            message.Subject = "Test Mail Via Hangfire Background Job 😎"; // Thoda subject change kiya hai test ke liye
 
             string MailBody = "<!DOCTYPE html>" +
-  "<body style=\"display:flex; justify-content:center;\">" +
-  "<div style=\"min-height: 10rem; width: 40rem; background-color: aqua; padding: 1rem; border-radius: 10px;\">" +
-       " <table style=\"width:100%; color:white; border: 1px solid black; text-align: center;\">" +
-           " <thead style=\"color:black;\">" +
-                "<tr>" +
-                   " <th style=\"border: 1px solid black;\"> Name </th>" +
-                   " <th style=\"border: 1px solid black;\"> Email </th>" +
-                   " <th style=\"border: 1px solid black;\"> Message </th>" +
-               " </tr>" +
-            "</thead>" +
-            "<tbody>" +
-                "<tr>" +
-                   $" <td style=\"border: 1px solid black;\"> {messageDetails.Name} </td>" +
-                    $"<td style=\"border: 1px solid black;\"> {messageDetails.Email} </td>" +
-                   $" <td style=\"border: 1px solid black;\"> {messageDetails.MessageData} </td>" +
-                "</tr>" +
-           " </tbody>" +
-        "</table>" +
-"</body>" +
+              "<body style=\"display:flex; justify-content:center;\">" +
+              "<div style=\"min-height: 10rem; width: 40rem; background-color: aqua; padding: 1rem; border-radius: 10px;\">" +
+                   " <table style=\"width:100%; color:white; border: 1px solid black; text-align: center;\">" +
+                       " <thead style=\"color:black;\">" +
+                            "<tr>" +
+                               " <th style=\"border: 1px solid black;\"> Name </th>" +
+                               " <th style=\"border: 1px solid black;\"> Email </th>" +
+                               " <th style=\"border: 1px solid black;\"> Message </th>" +
+                           " </tr>" +
+                        "</thead>" +
+                        "<tbody>" +
+                            "<tr>" +
+                               $" <td style=\"border: 1px solid black;\"> {name} </td>" +
+                                $"<td style=\"border: 1px solid black;\"> {email} </td>" +
+                               $" <td style=\"border: 1px solid black;\"> {messageData} </td>" +
+                            "</tr>" +
+                       " </tbody>" +
+                    "</table>" +
+            "</body>" +
+            "</html>";
 
-"</html>";
             message.Body = MailBody;
             message.IsBodyHtml = true;
             smtpClientsmtp.Port = 587;
             smtpClientsmtp.Host = "smtp.gmail.com";
             smtpClientsmtp.EnableSsl = true;
             smtpClientsmtp.UseDefaultCredentials = false;
-            smtpClientsmtp.Credentials = new NetworkCredential("gulshankumar.mailid01@gmail.com", "aeljomqrgsaqgtkv");
+            // ⚠️ Dhyan rakhna: Live project mein aisi app passwords appsettings.json mein rakhte hain!
+            smtpClientsmtp.Credentials = new NetworkCredential("gulshankumar.mailid01@gmail.com", "qrzxtmcskcrwiduc");
             smtpClientsmtp.DeliveryMethod = SmtpDeliveryMethod.Network;
+
+            // Ab ye code background mein chalega bina user ko wait karaye
             smtpClientsmtp.Send(message);
-            ModelState.Clear();
-            return View();
         }
+        #endregion Hangfire Email In Background Send End
 
         public IActionResult ViewJobs()
         {

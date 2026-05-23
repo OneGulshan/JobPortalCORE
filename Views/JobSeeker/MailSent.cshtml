@@ -12,9 +12,9 @@
                     <h3 class="mb-0">📧 Send a Message</h3>
                     <p class="small mb-0 opacity-75">Humein apni query ya message likh kar bhejein</p>
                 </div>
-                
+
                 <div class="card-body p-4 p-md-5">
-                    <form asp-action="MailSent">
+                    <form asp-action="MailSent" id="mailForm">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                         <div class="mb-3">
@@ -48,7 +48,7 @@
                         </div>
                     </form>
                 </div>
-                
+
                 <div class="card-footer bg-white text-center py-3 border-0">
                     <small class="text-muted">Humein aapki feedback ka intezaar rahega!</small>
                 </div>
@@ -60,5 +60,31 @@
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    @if (ViewBag.Message != null)
+    {
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+        <script>
+            // Page load hote hi ye jadoo chalega
+            $(document).ready(function() {
+
+            // 🍞 Toaster ki Settings aur Pop-up
+            toastr.options = {
+            "closeButton": true,
+            "positionClass": "toast-top-right", // Screen mein upar seedhe haath (right) par aayega
+            "timeOut": "5000", // 5 second baad khud gayab ho jayega
+            "progressBar": true
+            };
+
+            // Success wala (Hare rang ka) toaster dikhao
+            toastr.success('@Html.Raw(ViewBag.Message)', 'Success!');
+
+            // 🧹 Jadoo: Form ko automatically saaf (reset) kar do taaki purana text gayab ho jaye
+            $('#mailForm').trigger("reset");
+            });
+        </script>
     }
 }

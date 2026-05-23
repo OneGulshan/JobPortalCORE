@@ -50,7 +50,7 @@
                             @item.InsertedDate.ToString("dd-MMM-yyyy")
                         </td>
                         <td class="text-center">
-                            <button onclick="SentMail(@item.CompanyId)" class="btn btn-primary btn-sm px-3 rounded-pill shadow-sm">
+                            <button type="button" onclick="SentMail('@item.CompanyId')" class="btn btn-primary btn-sm px-3 rounded-pill shadow-sm">
                                 Apply Now
                             </button>
                         </td>
@@ -86,17 +86,24 @@
 
     <script type="text/javascript">
         function SentMail(CompanyId) {
+            // Browser ke console me check karne ke liye (F12 daba kar dekhna agar na chale)
+            console.log("Button Clicked! CompanyId: " + CompanyId);
+
+            // URL set karna
             var url = '@Url.Action("MailSent", "JobSeeker")?CompanyId=' + CompanyId;
             document.getElementById('iframe_pop').src = url;
-            
-            // Smoothly show overlay and popup
+
+            // 👇 Simple aur Smooth animation jo har halat mein chalegi
             $('#div_overlay').fadeIn(300);
-            $('#div_popup').css('display', 'block').addClass('animate__animated animate__zoomIn');
+            $('#div_popup').fadeIn(300);
         }
 
         function ClosePopup() {
+            // Iframe ka URL clear kar rahe hain taaki next time kholne par purana page na dikhe
             $('#div_overlay').fadeOut(300);
-            $('#div_popup').fadeOut(300);
+            $('#div_popup').fadeOut(300, function() {
+                document.getElementById('iframe_pop').src = "";
+            });
         }
     </script>
 }
