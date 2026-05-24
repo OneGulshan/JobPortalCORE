@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="../ImageCompressionWorker.cs/ImageCompressionWorker.cs.csproj" Id="dd1d90dd-1894-4619-b78d-cd51cdc65273" />
   <Project Path="JobPortalCORE.csproj" />
 </Solution>

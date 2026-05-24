@@ -4,6 +4,7 @@ using JobPortalCORE.Filters;
 using JobPortalCORE.Models;
 using JobPortalCORE.Services;
 using Microsoft.EntityFrameworkCore;
+using JobPortalCORE.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +37,10 @@ builder.Services.AddHangfireServer();
 // 👇 Ye tere background postman (Receiver) ko chalu kar dega
 builder.Services.AddHostedService<ServiceBusReceiverWorker>();
 
+// Ye line SignalR ko local ki jagah seedha Azure Cloud par bhej degi
+builder.Services.AddSignalR()
+       .AddAzureSignalR(builder.Configuration.GetConnectionString("AzureSignalRConnectionString"));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -57,5 +62,5 @@ app.MapRazorPages();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=JobSeeker}/{action=Index}/{id?}");
-
+app.MapHub<NotificationHub>("/notificationHub");
 app.Run();

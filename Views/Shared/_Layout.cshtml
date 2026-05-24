@@ -88,7 +88,7 @@
                 <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
                     <i class="bi bi-briefcase-fill me-2"></i> JobPortal
                 </a>
-                
+
                 <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -131,7 +131,7 @@
                             </ul>
                         </li>
                     </ul>
-                    
+
                     <div class="d-flex align-items-center">
                         <partial name="_LoginPartial" />
                     </div>
@@ -161,5 +161,33 @@
     <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+        const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/notificationHub")
+        .withAutomaticReconnect() // 👈 Ye line jadoo karegi, isko add kar de
+        .build();
+
+        connection.on("ReceiveNotification", function (message) {
+        // Jaise hi cloud se message aayega, Toaster chalega
+        toastr.success(message, "Cloud Background Task ☁️", {
+        timeOut: 8000,
+        positionClass: "toast-bottom-right"
+        });
+        });
+
+        connection.start().then(function () {
+        console.log("Azure SignalR: Live Pipe Connect ho gaya hai!");
+        }).catch(function (err) {
+        console.error("SignalR Connection Error: ", err.toString());
+        });
+        });
+    </script>
 </body>
 </html>
