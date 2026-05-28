@@ -36,4 +36,11 @@
 		<Folder Include="wwwroot\Images\" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<Compile Remove="ImageCompressionWorker.cs\**" />
+		<Content Remove="ImageCompressionWorker.cs\**" />
+		<EmbeddedResource Remove="ImageCompressionWorker.cs\**" />
+		<None Remove="ImageCompressionWorker.cs\**" />
+	</ItemGroup>
+	
 </Project>

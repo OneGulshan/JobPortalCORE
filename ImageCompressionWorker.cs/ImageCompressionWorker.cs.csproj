@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<AzureFunctionsVersion>v4</AzureFunctionsVersion>
+		<OutputType>Exe</OutputType>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>9b807d74-5a5c-4869-b948-7856dddba05c</UserSecretsId>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+		<PackageReference Include="Azure.Data.Tables" Version="12.11.0" />
+		<PackageReference Include="Azure.Storage.Blobs" Version="12.27.0" />
+		<PackageReference Include="Azure.Storage.Files.Shares" Version="12.25.0" />
+		<PackageReference Include="Azure.Storage.Queues" Version="12.25.0" />
+		<PackageReference Include="Microsoft.Azure.Functions.Worker" Version="2.0.0" />
+		<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore" Version="2.0.0" />
+		<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Storage.Blobs" Version="6.6.0" />
+		<PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Azure" Version="1.13.1" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.5" />
+
+		<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.SignalRService" Version="1.14.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="host.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="local.settings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>Never</CopyToPublishDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Using Include="System.Threading.ExecutionContext" Alias="ExecutionContext" />
+	</ItemGroup>
+</Project>
