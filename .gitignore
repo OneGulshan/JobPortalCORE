@@ -5,3 +5,4 @@
 /.vs/JobPortalCORE.slnx
 /bin/Debug/net8.0
 /obj
+/appsettings.json
