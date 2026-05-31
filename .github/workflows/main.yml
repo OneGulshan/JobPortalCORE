@@ -21,7 +21,7 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o ./myapp-dist
+        run: dotnet publish -c Release -o ./myapp-dist --no-build
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
