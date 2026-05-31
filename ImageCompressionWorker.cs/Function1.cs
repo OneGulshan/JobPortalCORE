@@ -33,10 +33,10 @@ namespace ImageCompressionWorker
                 CompressedImage = inputBlob,
 
                 // B. SignalR se browser par Toaster bhejo
-                SignalRMessage = new SignalRMessageAction("ReceiveNotification")
-                {
-                    Arguments = new[] { $"✅ Boom! Teri image '{name}' background mein compress hokar cloud par save ho gayi hai!" }
-                }
+                //SignalRMessage = new SignalRMessageAction("ReceiveNotification")
+                //{
+                //    Arguments = new[] { $"✅ Boom! Teri image '{name}' background mein compress hokar cloud par save ho gayi hai!" }
+                //}
             };
         }
     }
@@ -49,7 +49,7 @@ namespace ImageCompressionWorker
         public byte[] CompressedImage { get; set; }
 
         // Output 2: SignalR Cloud
-        [SignalROutput(HubName = "notificationHub", ConnectionStringSetting = "AzureSignalRConnectionString")]
-        public SignalRMessageAction SignalRMessage { get; set; }
+        //[SignalROutput(HubName = "notificationHub", ConnectionStringSetting = "AzureSignalRConnectionString")]
+        //public SignalRMessageAction SignalRMessage { get; set; }
     }
 }

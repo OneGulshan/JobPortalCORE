@@ -543,7 +543,7 @@ namespace JobPortalCORE.Controllers
         }
 
         // 📮 Helper Method: Jo cloud par message deliver karega
-        private async Task Skinner_SendMessageToQueueAsync(string connectionString, string queueName, string messageBody)
+        private static async Task Skinner_SendMessageToQueueAsync(string connectionString, string queueName, string messageBody)
         {
             // Client aur Sender ko create karo
             await using var client = new ServiceBusClient(connectionString);
