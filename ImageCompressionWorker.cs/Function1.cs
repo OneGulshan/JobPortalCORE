@@ -50,6 +50,8 @@ namespace ImageCompressionWorker
 
         // Output 2: SignalR Cloud
         //[SignalROutput(HubName = "notificationHub", ConnectionStringSetting = "AzureSignalRConnectionString")]
-        //public SignalRMessageAction SignalRMessage { get; set; }
+        //public
+        //
+        //Action SignalRMessage { get; set; }
     }
 }
