@@ -162,17 +162,17 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    @*<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>*@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <script>
         $(document).ready(function () {
-        const connection = new signalR.HubConnectionBuilder()
-        .withUrl("/notificationHub")
-        .withAutomaticReconnect() // 👈 Ye line jadoo karegi, isko add kar de
-        .build();
+        // const connection = new signalR.HubConnectionBuilder()
+        // .withUrl("/notificationHub")
+        // .withAutomaticReconnect() // 👈 Ye line jadoo karegi, isko add kar de
+        // .build();
 
         connection.on("ReceiveNotification", function (message) {
         // Jaise hi cloud se message aayega, Toaster chalega

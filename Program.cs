@@ -35,11 +35,11 @@ builder.Services.AddHangfire(configuration => configuration
 builder.Services.AddHangfireServer();
 
 // 👇 Ye tere background postman (Receiver) ko chalu kar dega
-builder.Services.AddHostedService<ServiceBusReceiverWorker>();
+//builder.Services.AddHostedService<ServiceBusReceiverWorker>();
 
-// Ye line SignalR ko local ki jagah seedha Azure Cloud par bhej degi
-builder.Services.AddSignalR()
-       .AddAzureSignalR(builder.Configuration.GetConnectionString("AzureSignalRConnectionString"));
+//// Ye line SignalR ko local ki jagah seedha Azure Cloud par bhej degi
+//builder.Services.AddSignalR()
+//       .AddAzureSignalR(builder.Configuration.GetConnectionString("AzureSignalRConnectionString"));
 
 var app = builder.Build();
 
@@ -62,5 +62,5 @@ app.MapRazorPages();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=JobSeeker}/{action=Index}/{id?}");
-app.MapHub<NotificationHub>("/notificationHub");
+//app.MapHub<NotificationHub>("/notificationHub");
 app.Run();
